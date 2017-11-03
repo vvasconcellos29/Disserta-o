@@ -6,7 +6,16 @@
 
 A evolução das comunicações, desde o seu início em 1980 com a primeira geração (1G) até os dias de hoje, vem sendo pautada na implementação de melhorias a um sistema anterior. A segunda geração (2G) deu início a era digital, que buscava corrigir a questão de segurança da rede analógica. A terceira geração (3G) surgiu para permitir o tráfego de dados, que existia na 2G de forma muito tímida. A quarta geração (4G), por sua vez, foi desenvolvida para aumentar a qualidade de serviço, resolvendo problemas como instabilidade e baixa velocidade de tráfego \cite{Best}. 
 \par A próxima geração (5G) vem para quebrar paradigmas. Os problemas atuais não demandariam uma nova geração de telefonia para serem corrigidos. Tratam-se de questões relacionadas a cobertura e custo, que não requerem novos padrões ou funcionalidades. Entretanto, a estagnação na 4G poderia limitar o desenvolvimento de diversas tecnologias e buscando evitar isso, a 5G tenta construir padrões que permitirão às sociedades futuras uma realidade muito diferente da atual.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=3.5in]{mtc.png}
+\caption{Internet das Coisas}
+\label{MTC}
+\end{figure}
+
 \par Nesse contexto, fala-se em uma divisão da geração futura em três categorias: \textit{enhanced mobile broadband (eMBB)}, que procura melhorar a comunicação móvel de banda larga; \textit{machine-type communications (mMTC)}, que desenvolve a comunicação dispositivo a dispositivo (D2D) e \textit{ultra reliable MTC (uMTC)}, que deseja confiabilidade na comunicação entre máquinas [\cite{Qualcomm}]. A ideia é desenvolver cada uma dessas categorias de forma a viabilizar, entre outras aplicações \cite{Wunder}
+
 
 \begin{enumerate}
 \item \textbf{internet das coisas} (IoT \textit{Internet of Things})  
@@ -29,7 +38,13 @@ A IoT é algo grandioso. Imagina-se a conexão massiva entre dispositivos, veíc
 Incrivelmente, a forma de onda OFDM (\textit{Orthogonal Frequency Division Multiplexing}), que foi a grande possibilitadora da 4G, pode representar um obstáculo a essa nova fase. Os requisitos de ortogonalidade e sincronismo do OFDM não conversam com as soluções imaginadas para tornar a quinta geração possível \cite{Wunder}. 
 
 \par O problema começa com o tráfego esporádico (TE) \cite{Wild}, demandado pela IoT. Os dispositivos não estarão em comunicação com a rede continuamente. Isso é impraticável a equipamentos alimentados por baterias, por ser totalmente ineficiente do ponto de vista energético. A ideia é simples: se o equipamento possui uma mensagem ele se conecta a rede, entrega sua informação e se desconecta. Para que isso funcione com os requisitos LTE de sincronismo, seria necessário acoplar ao sinal transmitido uma considerável parte dedicada a controle, o que representa um desperdício de recurso \cite{Wunder}. Essa dificuldade já é evidenciada hoje, no \textit{fast dormancy} \cite{Zhao}, mecanismo utilizado por fabricantes de celulares.    
-\par O sincronismo se mostra como um empecilho mais uma vez quando esbarra na ideia de cooperação entre células adjacentes (CoMP) \cite{Wunder}. Este conceito é utilizado na 4G e melhora o desempenho do sistema a medida que combina diferentes antenas para transmissão e recepção, ainda que estas não estejam na mesma célula \cite{DLee}. Se para enviar mensagens sem contato simultâneo com a rede já se demanda uma quantidade considerável de bits de uma mensagem dedicada a sinals de controle, para sincronizar várias BSs e estações móveis (MSs), o cenário é muito pior. Ainda, os sinais recebidos por cada MS sofrem atrasos diferentes a depender da estação que os emite. Isto, somado ao atraso natural de qualquer canal sem fio, exigiria um prefixo cíclico muito grande nos caso de símbolos OFDM para que a interferência fosse mitigada, contribuindo ainda mais pro \textit{overhead} do símbolo em transmissão \cite{Wunder}. 
+\par O sincronismo se mostra como um empecilho mais uma vez quando esbarra na ideia de cooperação entre células adjacentes (CoMP) \ref{comp} \cite{Wunder}. Este conceito é utilizado na 4G e melhora o desempenho do sistema a medida que combina diferentes antenas para transmissão e recepção, ainda que estas não estejam na mesma célula \cite{DLee}. Se para enviar mensagens sem contato simultâneo com a rede já se demanda uma quantidade considerável de bits de uma mensagem dedicada a sinals de controle, para sincronizar várias BSs e estações móveis (MSs), o cenário é muito pior. Ainda, os sinais recebidos por cada MS sofrem atrasos diferentes a depender da estação que os emite. Isto, somado ao atraso natural de qualquer canal sem fio, exigiria um prefixo cíclico muito grande nos caso de símbolos OFDM para que a interferência fosse mitigada, contribuindo ainda mais pro \textit{overhead} do símbolo em transmissão \cite{Wunder}. 
+\begin{figure}[h!]
+\centering
+\includegraphics[width=3.5in]{comp.png}
+\caption{Estrutura CoMP}
+\label{comp}
+\end{figure}
 \par A esses reveses, apresenta-se como solução a utilização de uma nova forma de onda na camada físca (PHY) 5G, a qual não tenha como característica fundamental a ortogonalidade e o sincronismo. Em seu lugar, sugere-se a utilização de filtros como instrumento de mitigação de interferências, os quais podem ser aplicados a cada subportadora, como propõe o FBMC (Filter Bank Multicarrier); ou a sub-bandas, cujo número de subportadoras filtradas em conjunto pode variar - proposta do UFMC (Universal Filtered Multicarrier). 
 \par A próxima seção trata das considerações ao se utilizar uma nova forma de onda e mostra porque este tema foi escolhido para ser explorado neste trabalho. 
 
@@ -46,4 +61,8 @@ Na seção \ref{contextualização}, mostrou-se que o uso de novas formas de ond
 \item avaliação de efetividade da aplicação do algoritmo de pre-distorção digital (DPD) as ondas candidatas quando os efeitos de memória são levados em consideração. 
  
  \end{itemize}
+ 
+ \section{Organização da Dissertação}
+ 
+Este texto se organiza como a seguir: o capítulo 1 traz a revisão bibiográfica utilizada ao longo da pesquisa; o capítulo 2 descreve as formas de onda candidatas ao 5G e mostra o desempenho dessas tecnologias em cenários diversos. No capítulo 3 apresentam-se os dois modelos de amplificadores utilizados para gerar os resultados, que aparecem no capítulo seguinte. O capítulo 5 finaliza o trabalho, trazendo as conclusões obtidas com as análises desta dissertação. 
 

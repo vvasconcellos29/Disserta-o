@@ -9,9 +9,10 @@
 % e permite copiar corretamente o texto do PDF.
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-
+\usepackage{amsmath}
 % Adição do pacote do template da UnB
 \usepackage{template-FT-UnB/ft2unb}
+\usepackage{array}
 
 \DeclareGraphicsExtensions{.jpg,.pdf,.mps,.png,.gif, .eps}
 \graphicspath{imagens} %define diretório de imagens
@@ -132,11 +133,14 @@
 	\mainmatter %Inicia a numeracao normal cardinal
 	\setcounter{page}{1} \pagenumbering{arabic} \pagestyle{plain}
 	
-	\include{introducao}
-	\include{capitulo1}
-	\include{capitulo2} 
-	\include{conclusao} 
-		
+	%\include{introducao}
+	%\include{capitulo1}
+	%\include{capitulo2}
+    \include{capitulo3}
+    %\include{capitulo4}
+    %\include{capitulo5}
+	%\include{conclusao} 
+	
 	\bibliographystyle{abnt-num} % estilo bibliográfico ABNT numérico
 	\bibliographystyle{abnt-alf} % estilo bibliográfico ABNT alfabético
 	\bibliographystyle{sbc}  % estilo bibliográfico da Sociedade Brasileira de Computação (SBC)
@@ -144,11 +148,9 @@
    \renewcommand{\bibname}{REFERÊNCIAS BIBLIOGRÁFICAS} %Define o Caption da seção de bibliografia
 	\addcontentsline{toc}{chapter}{REFERÊNCIAS BIBLIOGRÁFICAS}
     
-    \bibliography{referencias}
+    %\bibliography{referencias}
 
-    
-
-
+   
 	\include{apendice}
 
 \end{document}
