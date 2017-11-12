@@ -1,22 +1,244 @@
 \chapter{\textit{Filter Bank Multicarrier} - FBMC} \label{capitulo3}
 
-%Este capítulo descreve as principais formas de onda candidatas a 5G. O OFDM já é bastante conhecido, então será apresentado de forma breve, dando-se destaque as suas variações, citadas no capítulo anterior. O FBMC e o UFMC são trazidos de forma detalhada, mostrando-se, inclusive, o comportamento dessas formas de onda sob efeitos do canal de comunicação RF. 
+Este capítulo descreve a forma de onda FBMC. Este sistema é um tipo de tecnlogia FDM (\textit{frequency division multiplexing} - multiplexação por divisão na frequência), em que uma informação de banda larga é dividida em bandas mais estreitas, que ocupam alguns canais na frequência para serem transmitidas \cite{FDM}. Este tipo de multiplexação não é nenhuma novidade, mas, assim como os algortimos de FFT e IFFT popularizaram o OFDM, existem alguns recursos de processamento digital de sinais (DSP) que tornam o FDM e por conseguinte o FBMC mais atrativos no presente. A próxima seção mostra como isso acontece. 
 
-%\section{Orthogonal Fequency Division Multiplexing (OFDM)}
+\section{Processamento de Sinais Associado ao FDM}
 
-%\begin{figure}[h!]
-%\centering
-%\includegraphics[width=3.5in]{fig_OFDM_freq.png}
-%\caption{Subportadoras OFDM}
-%\label{fig_OFDM_freq.png}
-%\end{figure}
-%\end{figure}
+\par Sinais de multiplexação em frequência tipicamente são criados através de estruturas como a da Figura \ref{trans_FDM}: 
 
-%\section{Filter Bank Multi Carrier (FBMC)}
-A descrição da forma de onda FBMC pode ser vista como uma generalização do OFDM, com menos restrições em relação ao formato de pulso utilizado para filtrar subportadoras. No contexto da 5G, entretanto, trata-se de algo mais robusto. O projeto PHYDAS (\textit{\textbf{PHY}sical layer for \textbf{DY}namic \textbf{A}cces\text{S} and cognitive radio}) \cite{phydas} se preocupou em criar um desenho bastante específico desta tecnologia, procurando construí-la de tal forma que diversas desvantagens do OFDM fossem superadas, abrindo portas para tornar as aplicações idealizadas para a 5G possíveis. É esta versão que será trazida aqui. 
+\begin{figure}[h!]
+\centering
+\includegraphics[width=3.5in]{transceptor_FDM.png} %Trocar para sistema FDM
+\caption{Esquema de Transmissão e Recepção FDM}
+\label{trans_FDM}
+\end{figure}
+
+\par Este tipo de sistema é bastante problemático. Observa-se que para que as sub-bandas mencionadas na introdução deste capítulo sejam transferidas aos seus canais correspondentes, cada ramo é multiplicado por uma frequência. O tipo de \textit{hardware} utilizado para realizar esta operação é o oscilador, um dispositivo altamente sensível a ruídos externos \cite{Boroujeny}. A consequência disto é que qualquer variação do ambiente externo resulta em desvios de frequência, o que dificulta a detecção correta do sinal, reduzindo a qualidade da informação obtida. Ilustrando melhor a dificuldade, para que a recepção fosse perfeita, cada ramo do receptor deveria ter um oscilador idêntico ao de transmissão, o que além de ser bastante complexo, envolve alto custo de implementação e gasto excessivo de energia, além de demandar bastante espaço nas estações móvel e base \cite{Krishna}.  O processamento digital do sinal FDM, tanto no processo de transmissão quanto no de detecção é uma alternativa interessante ao que foi descrito. A seguir, mostra-se como é possível utilizar esta ferramenta. 
+
+\par Suponha que se deseja sub-amostrar um sinal discreto $x[n]$, amostrado do sinal contínuo $x_{c}[n]$, por um fator M. No domínio do tempo, esta operação é bastante simples, como mostra a Figura \ref{downsmp} e a equação \ref{downsmpeq} :
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=3.5in]{DownSample.png} %Trocar para onda subamostrada
+\caption{Exemplo de Subamostragem}
+\label{downsmp}
+\end{figure}
+
+\begin{equation}\label{downsmpeq}
+x_{d}[n] = x[Mn] 
+\end{equation}
+
+Suponha, ainda, que após a subamostragem, deseja-se aplicar ao sinal contínuo um filtro discreto $h[n]$, obtendo-se o sinal :
+
+\begin{equation}
+y[n] = \sum_{k=-\infty}^{\infty}x_{d}[k]h[n-k]
+\end{equation}
+
+É possível reescrever $y[n]$ como 
+
+\begin{equation} \label{filt_sub}
+y[n] = \sum_{k=-\infty}^{\infty}x_[k]h[nM-k]
+\end{equation}
+
+Guarde a equação \ref{filt_sub} e considere o seguinte: 
+
+Uma sequência qualquer $u[k]$ pode ser reescrita fazendo-se k = rM + m, como $\sum_{m=0}^{M-1}$ $u[rM + m]$. A figura \ref{seq_poly} ilustra o processo:  
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=3.5in]{seq_sub.png} % Construindo uma seq através de outra
+\caption{Construção de uma sequência através de sub-sequências}
+\label{seq_poly}
+\end{figure}
+
+Voltando a equação \ref{filt_sub} e aplicando-se o conceito da Figura \ref{seq_poly}, tem-se o resultado
+
+\begin{equation} \label{conv_poly}
+\begin{split}
+y[n] &= \sum_{m=0}^{M-1}\sum_{r=-\infty}^{\infty}x_[rM+m]h[nM-rM+m] \\ 
+     &= \sum_{m=0}^{M-1}\sum_{r=-\infty}^{\infty}x_[rM+m]h[(n-r)M+m] 
+\end{split}
+\end{equation}
+
+Seja $x_m[r] = x[rM + m ]$ e $h_m[r] = h[rM + m]$, a equação \ref{conv_poly} pode ser reescrita como \cite{Kirshna}
+
+\begin{equation} \label{conv_poly2}
+\begin{split}
+y[n] &= \sum_{m=0}^{M-1}\sum_{r=-\infty}^{\infty}x_{m}[r]h[n-r] \\ 
+     &= \sum_{m=0}^{M-1}u_{m}[r]\ast h_{m}[r]
+\end{split}
+\end{equation}
+
+Observa-se, então que é possível, quando da sub-amostragem (e também da super), filtrar-se partes de um sinal através de "sub-filtros". Tanto as "partes" ($u_{m}[n]$) quanto os "sub-filtros" ($h_{m}[n]$) são chamados componentes polifásicas. Este desenvolvimento será mantido em \textit{hold} por alguns instantes, enquanto se explora um outro tópico: o que acontece no domínio da frequência quando se sub-amostra um sinal? O porquê desta pergunta fará sentido em breve. 
+
+Na Figura \ref{x_freq}, apresenta-se o espectro do sinal $x_{c}(t)$: 
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=2.5in]{spec_x.png} % espectro x_c(t)
+\caption{Espectro de $x_c(t)$}
+\label{x_freq}
+\end{figure}
+Amostrar este sinal no domínio do tempo, leva a expressão \cite{Krishna}
+\begin{equation}
+X(e^j\omega) = \frac{1}{T}\sum_{k=-\infty}^{\infty}\bigg[j\bigg(\frac{\omega}{T}-\frac{2\pi k}{T}\bigg)\bigg]
+\end{equation}
+no domínio da frequência, que é a transformada de Fourier de $x[n]$. 
+
+A transformada de $x_{d}[n]$ apresenta resultado semelhante \cite{Krishna}: 
+\begin{equation}
+X_{d}(e^j\omega) = \frac{1}{T'}\sum_{k=-\infty}^{\infty}\bigg[j\bigg(\frac{\omega}{T'}-\frac{2\pi k}{T'}\bigg)\bigg]
+\end{equation}
+Fazendo-se $T'=MT$:
+\begin{equation}\label{spec_sub}
+X_{d}(e^j\omega) = \frac{1}{MT}\sum_{k=-\infty}^{\infty}\bigg[j\bigg(\frac{\omega}{MT}-\frac{2\pi k}{MT}\bigg)\bigg]
+\end{equation}
+Seria interessante escrever $X_{d}(e^j\omega)$ em termos de $X(e^j\omega)$. Isto e possível ao aplicar-se o conceito da Figura \ref{seq_poly} à equação \ref{spec_sub} - trocando-se a variável $k por rM + m$:
+
+\begin{equation}\label{spec_sub1}
+\begin{split}
+X_{d}(e^j\omega) &= \frac{1}{M}\sum_{m=0}^{M-1}\frac{1}{T}\sum_{k=-\infty}^{\infty}\bigg[j\bigg(\frac{\omega - 2\pi m}{MT}-\frac{2\pi r}{T}\bigg)\bigg] \\
+                 &= \frac{1}{M}\sum_{m=0}^{M-1}X(e^\frac{\omega - 2\pi m}{M})
+\end{split}
+\end{equation}
+
+Graficamente, para M =2: 
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=2.5in]{sub_2.png} % espectro 2_fold
+\caption{Espectro de $x_c(t)$ sub-amostrado}
+\label{x_freq1}
+\end{figure}
+
+Observa-se que há alguns efeitos: alargamento da e repetição periódica da banda, além da redução da amplitude por um fator M. 
+A resposta a pergunta anterior obtida, faz-se mais uma: qual a consequência, na frequência, de um atraso no domínio do tempo? Bom, esta correspondência é bastante conhecida. Considerando-se um sinal no tempo $u[n]$,  atrasa-lo no tempo por uma quantidade $p$ de amostras resulta em \cite{Krishna}:
+
+\begin{equation}\label{delay}
+x[n-n{0}] <-> X(e^j(\omega)e^{-j\omega n_p}
+\end{equation}
+
+Graficamente, para M = 2. 
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=3.5in]{sub_2_d.png} % espectro 2_fold + atraso
+\caption{Espectro de $x_c(t)$ sub-amostrado com atraso}
+\label{x_freq_atraso}
+\end{figure}
+
+Apresentou-se até agora diversos conceitos de processamento de sinais e chegou a hora de conectá-los. Na Figura \ref{polifase} desenha-se a equação \ref{conv_poly2}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=3.5in]{filt_poli.png} % desenho filtro polifásico
+\caption{Estrutura de Realização da Convolução por Componentes Polifásicas}
+\label{polifase}
+\end{figure}
+
+Nesta figura, $H_{m}(zˆm)$ é a transformada-Z de $h_{m}[r]$.  
+
+Viu-se que atrasos e sub-amostragem possuem alguns efeitos no espectro de um sinal ao qual essas operações são aplicadas. 
+Na Figura \ref{efeitos}, explicitam-se estes efeitos para a primeira subportadora em cada ramo da Figura \ref{polifase}, admitindo como  entrada um sinal FDM como o de \ref{Espectro FDM}. Considere que as componentes $H_{m}(z^m)$ sejam filtros retangulares por simplicidade. 
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=2.5in]{spec_fdm.png} % espectro FDM
+\caption{Espectro FDM}
+\label{spec_fdm}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width = 5.5in]{poli_filt_1.png} % desenho filtro polifásico
+\caption{Estrutura de Realização da Convolução por Componentes Polifásicas}
+\label{efeitos}
+\end{figure}
+
+\par Não é intuitivo perceber, mas se alimentarmos as entradas de um bloco de transformada de Fourier inversa (IDFT) com o resultado de cada ramo, será possível recuperar as sub-bandas do sinal FDM individualmente. A Figura \ref{rec_poli} exemplifica isso para o primeiro ramo. Mostra-se, então, que é possível, através de filtros polifásicos, criar-se um receptor FDM por meio do processamento digital de sinais. Este é apresentado na Figura \ref{estrutura_completa}. 
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width = 4.5in]{efeito.png} % desenho da soma
+\caption{Receptor FDM com uso de Processamento de Sinais \cite{Krishna}}
+\label{rec_poli}
+\end{figure}
+
+\par Como todas as operações aqui apresentadas são lineares, é possível desfaze-las através de operações inversas. Sendo assim, desde que os filtros H(z) atendam ao critério de Nyquist \ref{Saeed}, é possível criar um transmissor análogo ao receptor desenhado aqui. A próxima seção mostra um pulso que atende a esta condição e mostra que algumas adaptações necessárias a estrutura da figura \ref{estrutura_completa} por conta deste.  
 
 
-\section{O Formato de Pulso}\label{pulso} 
+\begin{figure}[h!]
+\centering
+\includegraphics[width=3.5in]{estrutura_comp.png} % desenho soma 
+\caption{Receptor FDM com uso de Processamento de Sinais \cite{Krishna}}
+\label{estrutura_completa}
+\end{figure}
+
+
+\section{Formato de Pulso e Arquitetura de Transmissão/Recepção}
+
+Finalizou-se a seção anterior apontando-se para o cuidado que se deve ter com o pulso $H(z)$. É bem sabido que o uso de filtros exije obediência aos critérios de Nyquist para que a seja possível detectar o sinal sem que haja erros. Estes critérios são dois \cite{Saeed}:
+
+\begin{itemize}
+\item critério ordinário 
+
+\begin{equation}
+h_{n}(t)\ast h_{n}^{\ast}(-t)\|_{t=kT} = \delta_{k} 
+\end{equation}
+
+\begin{equation}
+\frac{1}{T}\sum_{m = -\infty}^{\infty}|H_{n}(j(\omega + m \frac{2 \pi}{T}))|^{2} = 1
+\end{equation}
+
+\item critério geral
+\begin{equation}
+h_{n}(t)\ast h_{n}^{*}(-t)|_{t=kT} = \delta_{k}\delta_{l-n} 
+\end{equation}
+\begin{equation}
+\frac{1}{T}\sum_{m = -\infty}^{\infty}H_{n}(j(\omega + m \frac{2 \pi}{T}))H_{l}^{*}(j(\omega + m \frac{2 \pi}{T})) = \delta_{l-n}
+\end{equation}
+
+\end{itemize}
+ 
+\par Desde a introdução desta dissertação, tem-se tentado mostrar a importância de pensar em formas de onda alternativas ao OFDM, para evitar o vazamento espectral, ter-se liberdade em relação ao sincronismo \ref{Bouroujeny} e entre outras razões. Uma ideia que naturalmente vem a cabeça é usar o OFDM com um filtro distinto da função retangular. Mostra-se a seguir porque isso não é uma alternativa: 
+
+Seja
+
+\begin{equation} \label{OFDM_pulso}
+h_{n}(t) = q(t)e^{j\frac{2\pi nt}{T}} \cite{Saeed}
+\end{equation}
+
+um pulso aplicado ao diagrama da Figura \ref{OFDM_Trans}, em que q(t) não obedece a formatação retangular usual. Seja $Q(e^{j\omega}$) a transformada de Fourier de q(t), este pulso só atende aos critérios de Nyquist se respeitam as equações a seguir \cite{Saeed}: 
+
+\begin{equation}
+\frac{1}{T}\sum_{m = -\infty}^{\infty}|Q_{n}(j(\omega -n \frac{2 \pi}{T} + m \frac{2 \pi}{T}))|^{2} = 1
+\end{equation}
+\begin{equation}
+\frac{1}{T}\sum_{m = -\infty}^{\infty}Q_{n}(j(\omega -n \frac{2 \pi}{T} + m \frac{2 \pi}{T}))Q_{l}^{*}(j(\omega -n \frac{2 \pi}{T} + m \frac{2 \pi}{T})) = \delta_{l-n} 
+\end{equation}
+
+\par Em \cite{Saeed} observa-se que estes critérios somente podem ser respeitados se $Q(e^{j\omega}) = 0$, que exije $|Q(e^{j\omega})| = 0$. Ou seja, a única forma de recuperar o sinal completamente é se o pulso $q(t)$ for nulo. Isto mostra que é inviável, com a estrutura crua do OFDM, utilizar um pulso alternativo. 
+\par A conclusão anterior traz preocupações em relação ao desenho obtigo na Figura \ref{estrutura_completa}. Para que a recuperação do sinal seja perfeita, são necessárias algumas adaptações ao que se vê ali para o caso de $h(t)$ diferente da função $rect(t)$. Em \cite{Boroujeny2} e \cite{Bellanger}, apresentam-se o "cosine modulated multitone - CMT" e o "staggered modulated multitione - SMT", alternativas ao problema de atendimento aos critérios de Nyquist. As duas soluções mostram que:
+
+\begin{enumerate}
+
+\item Realizar uma multiplicação do tipo $\sum e^{(j \omega a\frac{\pi}{T})}$:
+
+\begin{equation}
+h_{n}(t) = q(t)\sum e^{(j \omega a\frac{\pi}{T}t)},
+\end{equation}
+em que $a$ é um inteiro qualquer, que resulta em:
+\begin{equation}
+H_{n}(e^{(j \omega}) = Q(j(\omega - \sum a\frac{\pi}{T} + n\frac{2\pi}{T})
+\end{equation}
+
+\item e além disso, utilizar-se da modulação O-QAM
+
+\end{enumerate}
+resultam no atendimento aos critérios geral e ordinário de Nyquist. 
+\par Um modelo de filtro que ganhou popularidade na literatura FBMC relacionada ao 5G foi o projetado no PHYDAS \ref{Bellanger}. Este é apresentado a seguir:
+
+\subsection{Formato de Pulso}
 
 Como o filtro FBMC é o que o diferencia do OFDM, inicia-se a apresentação da forma de onda através do formato de pulso utilizado. Sabe-se que a IFFT/FFT possui um efeito de filtragem dos sinais a que é aplicada \cite{Boroujeny}. No domínio do tempo (discreto), pode-se representar este efeito da maneira a seguir \cite{Bellanger}:
 \begin{equation}
@@ -43,9 +265,9 @@ A equação \ref{eq_freq} é a fórmula matemática que leva ao espectro visto n
 
 Na tabela \ref{coef_FBMC}m, K representa o fator de superposição, ou seja, quantas amostras se sobrepõem em cada versão do filtro. Quanto maior for K, melhor localizado na frequência será o pulso. Para K = 4, tem-se a resposta da figura \ref{fig_FBMC}, no domínio da frequência:
 
-\begin{figure}[h!]
+5\begin{figure}[h!]
 \centering
-\includegraphics[width=3.5in]{fig_OFDM_freq.png}
+\includegraphics[width=3.5in]{comp.png} % Colocar o grafico das sub FBMC
 \caption{Subportadoras FBMC}
 \label{fig_FBMC}
 \end{figure}
@@ -60,106 +282,46 @@ H(f) = \sum_{k=-(K-1)}^{K-1}H_{k}\frac{\sin(\pi(f-\frac{k}{MK}))}{MKsin(\pi(f-\f
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=3.5in]{Trans_FBMC.png}
+\includegraphics[width=3.5in]{transceptor_FDM.png}
 \caption{Diagrama do Modem FBMC \cite{Boroujeny}}
 \label{Trans_FBMC}
 \end{figure}
 
 \par Na seção do OFDM viu-se o quanto os algortimos de IFFT/FFT foram fundamentais no desenvolvimento da forma de onda tratada ali. Observando-se a Figura \ref{Trans_FBMC}, observa-se uma oportunidade de utilização da ferramenta, já que cada ramo é multiplicado por $\exp^{^{+}_{-} j2\pi}{f_{k}}$, $f_{k} = \frac{ft}{T}$ - coeficientes da transformada de Fourier. 
 
-\par A próxima seção mostra que de fato se pode utilizar a transformada de Fourier para gerar os símbolos FBMC, o que torna a implementação muito mais simples. Para tanto é utilizada um recurso chamado "filtro polifásico". No caso da Figura \ref{Trans_FBMC}, seria necessária a utilização de osciladores de frequência, o que pode dificultar o processo de recepção correta, visto que instrumentos deste tipo são bastante suscetíveis a erros. 
 
-\section{Filtros Polifásicos}
-
-Filtros polifásicos são uma estrutura bastante comum em processamento digital de sinais. Qualquer sequência pode ser dividia em subsequências de menor ordem. Consideremos, por exemplo, a sequência h[n], que pode representar um filtro FIR (\textit{finite impulse response} - resposta ao impulso finita). Suas componentes polifásicas $h_{m}$ são dadas por:
-
-\begin{equation}
-h_{m}[Mn] = h[Mn + m],
-\end{equation}
-
-em que $m$ é uma sequência tal que $-\infty < m < \infty$, assim como $n$ e $M$ é um inteiro positivo. 
-\par Essa estrutura tão simples parece não trazer benefício algum. Isto é um grande engano. Dentro do contexto de criação de sinais FBMC, esta ferramenta será bastante importante e possibilitará a redução da complexidade de implementação do sinal.
-
-\par Imagine o processo de criação de um símbolo FBMC. Esta forma de onda é um tipo de sinal FDM (\textit{frequency division multiplexing} - multiplexação por divisão na frequência). Isto significa que um conjunto de símbolos de banda larga 
-$B$ será dividido em outros sinais, de mesma largura de banda $B' < B$. Esta característica é exibida na Figura \ref{espectro FDM}
-
-\begin{figure}[h!]
-\centering
-\includegraphics[width=4.5in]{Filtrado.png}
-\caption{Sinal FDM Genérico}
-\label{espectro FDM}
-\end{figure}
-
-\par A maneira convencional de gerar esse tipo de sinal implica em replicação de hardware no processo de recepção, o que amplia os custos, o consumo de energia e também o uso de espaço físico para acomadar as peças necessárias \cite{Krishna}. É por isso que o processamento digital do sinal é importante, tanto na geração do sinal quanto na sua recuperação. É aqui que entram as componentes polifásicas, em conjunto com alguns recursos extras que também serão bastante importantes, conforme será visto a seguir.
-\par As próximas explanações são baseadas na referência \cite{Krishna}. Neste artigo, o autor traz o conceito de filtros polifásicos associado ao processo de recepção de um sinal FDM. Aqui, será tratado o processo de geração do símbolo FBMC.
-\par Por se tratar de um esquema de múltiplos canais, o primeiro passo na criação de um símbolo FBMC é dividir uma sequência longa de símbolos modulados em subsequências menores: 
-
-\begin{figure}[h!]
-\centering
-\includegraphics[width=3.5in]{serie_paralelo.png}
-\caption{Divisão do Sinal FBMC em Sub-bandas}
-\label{espectro super FDM}
-\end{figure}
-
-\par Cada sub-banda deve ser levada à frequência desejada e filtrada com o formato de pulso adequado. Por brevidade, aqui os filtros serão supostos retangulares, mas sabe-se que a forma adequada é aquela apresentada na seção \ref{pulso}. Estes passos são mostrados a seguir:
-
-\begin{figure}[h!]
-\centering
-\includegraphics[width=3.5in]{freq_aloc.png}
-\caption{Alocação na Frequência e Filtragem}
-\label{filtro_freq}
-\end{figure}
-
-\par A estrutura que torna esse processo possível é exibida na figura
-
-\begin{figure}[h!]
-\centering
-\includegraphics[width=3.5in]{freq_aloc.png}
-\caption{Alocação na Frequência e Filtragem}
-\label{filtro_freq}
-\end{figure}
-
-
-\par Imagine um sinal super-amostrado $x_{u}[n]$ do domínio do tempo por um fator M inteiro. Ele será dado pela equação \ref{compoli}
-
-\begin{equation}]\label{compoli}
-x_{u}[n] = x[n/M],
-\end{equation}
-
-No domínio da frequência, este sinal será representado por
-
-\begin{equation}
-X_{u}(e^{j\omega}) = M/T\sum{r=-\infty}^{\infty}X_{c}\bigg[j\bigg(\frac{M\omega}{T}-\frac{2\pi rM}{T}\bigg)\bigg]
-\end{equation}
-
-Graficamente, isto consiste em repetir o sinal M vezes no espectro de forma periódica, sendo que a largura de banda de cada repetição é M vezes mais estreita e a amplitude M vezes maior. Se $x_{u}$ fosse o símbolo FDM da Figura \ref{espectro FDM}, teríamos uma repetição de múltiplas larguras de banda, e consequentemente a sobreposição. A figura \ref{espectro super FDM} ilustra isto. 
-
-\begin{figure}[h!]
-\centering
-\includegraphics[width=4.5in]{Super_Amostrado_1.png}
-\caption{Sinal FDM Super Amostrado}
-\label{espectro super FDM}
-\end{figure}
-
-\par No contexto FBMC, parte-se de uma banda contínua e se deseja chegar a algo parecido com a Figura \ref{espectro FDM}: 
-
-\begin{figure}[h!]
-\centering
-\includegraphics[width=4.5in]{Espetro_FBMC.png}
-\caption{Sinal FBMC}
-\label{espectro super FDM}
-\end{figure}
-
-\par Seja $h[n]$ o PHYDAS apresentado na seção \label{pulso} e $h_{m}$ suas componentes polifásicas, pode-se contruir a seguinte estrutura: 
-
-
-
-
-
-
-\section{Transmissor/Receptor FBMC}
 \subsection{Modulação O-QAM} 
 
+Os símbolos FBMC criados através de \ref{simb_FBMC} geram interferência entre subportadoras adjacentes. Uma forma de evitar o problema é ocupar apenas subportadoras de subíndice par ou ímpar, mas nunca as duas simultaneamente \cite{Bellanger}. Isto representa um desperdício de espectro muito grande, fugindo completamente do propósito de se empregar uma nova forma de onda, já que um dos requisitos é a utilização desterecurso de forma mais eficiente. Uma alternativa possível é a modulação O-QAM (O - ortogonal), que faz com que duas subportadoras vizinhas sejam ortogonais, permitindo que se sobreponham sem que haja interferência no ponto de detecção do sinal. Este tipo de modulação é descrito a seguir.
+\par Em sistemas usuais, tanto a parte imaginária quanto a parte real dos símbolos modulados digitalmente são transmitidas em conjunto. No O-QAM, é aplicado um atraso de meio período a uma das componentes do sinal de forma alternada - ora à parte real, ora à parte imaginária \cite{Bellanger}, conforme a figura \ref{O-QAM}. Isto faz com que canais adjacentes sejam sempre ortogonais uns aos outros, mas introduz algumas modificações a estrutura da Figura   \ref{simb_FBMC}.   
+ 
+\begin{figure}[h!]
+\centering
+\includegraphics[width=3.5in]{sub_2.png} %trocar pela OQAM 
+\caption{Modulação O-QAM}
+\label{simb_FBMC}
+\end{figure}
+
+\par Observa-se que o sinal tem o dobro de amostras. Isto indica a primeira alteração: ao invés de super-amostrar o sinal por $M$ na estrutura da figura \ref{simb_FBMC}, que a propósito é o número de subportadoras, será necessário, apenas, a super-amostragem por $M/2$. Uma outra mudança é necessária, mas que não tem relação com o OQAM. 
 
 
 \section{Desempenho sob o efeito de não linearidades }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

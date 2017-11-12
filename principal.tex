@@ -29,7 +29,7 @@
 %\onehalfspacing
 \title{DESEMPENHO DAS FORMAS DE ONDA CANDIDATAS AO 5G SOB EFEITO DE NÃO LINEARIDADES}
 \author{SEU NOME COMPLETO}
-\date{2011-03-16} %data da defesa
+\date{2017-12-21} %data da defesa
 
 \grau{Mestre} %Mestre ou Doutor
 \area{Engenharia Elétrica} %Nome do curso
@@ -38,7 +38,7 @@
 \programa{Mestrado} %Mestrado ou Doutorado
 \autorendereco{SEU ENDEREÇO COMPLETO AQUI.} %Endereço do autor da dissertação/tese
 \totalpgs{147} %total de páginas atualmente na sua dissertação
-\dia{18} %dia da defesa
+\dia{21} %dia da defesa
 \mes{Dezembro} %mês da defesa
 \ano{2017} %ano da defesa
 \numpublicacao{xxx/AAAA} %número da publicação (após a defesa, tal número deve ser obtido na secretaria)
@@ -133,25 +133,26 @@
 	\mainmatter %Inicia a numeracao normal cardinal
 	\setcounter{page}{1} \pagenumbering{arabic} \pagestyle{plain}
 	
-	%\include{introducao}
-	%\include{capitulo1}
-	%\include{capitulo2}
+	\include{introducao}
+	\include{capitulo1}
+	\include{capitulo2}
     \include{capitulo3}
-    %\include{capitulo4}
-    %\include{capitulo5}
-	%\include{conclusao} 
+    \include{capitulo4}
+    \include{capitulo5}
+	\include{conclusao} 
 	
 	\bibliographystyle{abnt-num} % estilo bibliográfico ABNT numérico
 	\bibliographystyle{abnt-alf} % estilo bibliográfico ABNT alfabético
 	\bibliographystyle{sbc}  % estilo bibliográfico da Sociedade Brasileira de Computação (SBC)
 	
    \renewcommand{\bibname}{REFERÊNCIAS BIBLIOGRÁFICAS} %Define o Caption da seção de bibliografia
-	\addcontentsline{toc}{chapter}{REFERÊNCIAS BIBLIOGRÁFICAS}
+	%\addcontentsline{toc}{chapter}{REFERÊNCIAS BIBLIOGRÁFICAS}
     
-    %\bibliography{referencias}
+    \bibliography{referencias}
 
    
 	\include{apendice}
+	\pdfbookmark[0]{Anexo II}{anexoII}
 
 \end{document}
 
